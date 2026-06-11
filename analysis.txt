@@ -1,0 +1,23 @@
+Carter Barlow A07
+
+
+1: I collected every single books title, price, and rating. I collected it from books.toscrape.com.
+And I scraped 1000 books total, this is actually shown on my code. Each record has four 
+fields: title (text), price (float), rating (integer 1–5), and availability (text).
+
+2: I first import a ton of things, like peewee and sqlite3. I then do a database setup. I then
+fetch the url. I then parse the books. I then scrape all catalogue pages. I then save the books
+to a database. I then load books onto a dataframe. I find average price per rating and then mark
+a chart for it. I then have my main line and print a ton of stuff like the total amount of books
+or average price of book per rating.
+
+3: I noticed that the most expesnive book was not the 5 star ones, it was the 4 star ones. But the
+cheapest books were the 1 star ones. 
+
+4. Yes I ensured the data was ethical (the website said it could be scraped). I checked multiple times
+to try to find the robot.txt for the website but coulf not find it. I even asked claude to help me.
+But I put 1 second in between each search to make sure everything was reasonable.
+
+5. I was limited I would say on my knowledge of how to write this code. I asked claude a lot for help. 
+But I was also limited on what I scraped. I didn't go into any of the books, I only scraped the basic
+info. So next time I would try to get more info from my scrape. My quality, less quantity.
