@@ -27,7 +27,7 @@ import sqlite3
 #database setup
 db = SqliteDatabase('books.db')
 class Book(Model):
-    title = CharField()
+    title = CharField(unique=True)
     rating = FloatField()
     price = FloatField()
 
@@ -37,11 +37,17 @@ db.connect()
 db.create_tables([Book])
 
 #fethc url
-def fetch_and_parse(url):
+def fetch_and_parse(url, retries=3, delay=2):
     """Fetch URL, return BeautifulSoup or None."""
-    response = requests.get(url)
-    if response.status_code == 200:
-        return BeautifulSoup(response.text, "html.parser")
+    for attempt in range(retries):
+        try:
+            response = requests.get(url, timeout=10)
+            if response.status_code == 200:
+                return BeautifulSoup(response.text, "html.parser")
+            return None
+        except requests.exceptions.RequestException as e:
+            print(f"Request to {url} failed ({e}); retry {attempt + 1}/{retries}")
+            time.sleep(delay)
     return None
 
 
@@ -83,10 +89,9 @@ def scrape_all_books():
 
 #save books to database
 def save_books(books):
-    '''Clear old data and insert scraped books into database'''
-    Book.delete().execute()
+    '''Insert scraped books into database, skipping any that already exist'''
     with db.atomic():
-        Book.insert_many(books).execute()
+        Book.insert_many(books).on_conflict_ignore().execute()
 
 #load books into a dataframe
 def load_dataframe():
@@ -115,8 +120,8 @@ def plot_avg_price(avg_price_by_rating):
 
 
 
-if __name__ == "__main__":
-
+def main():
+    '''Run the full scrape, store, analyze, and visualize pipeline'''
     books = scrape_all_books()
     print(f"Scraped {len(books)} books total")
     save_books(books)
@@ -125,9 +130,22 @@ if __name__ == "__main__":
     df = load_dataframe()
     print(df.head())
 
+    print(f"\nOverall average price: £{df['price'].mean():.2f}")
+    print(f"Price range: £{df['price'].min():.2f} - £{df['price'].max():.2f}")
+
     avg_price_by_rating = analyze_books(df)
     print("\nAverage price by rating:")
     print(avg_price_by_rating)
 
+    highest_rating = avg_price_by_rating.idxmax()
+    lowest_rating = avg_price_by_rating.idxmin()
+    print(f"\nFinding: {highest_rating}-star books have the highest average price "
+          f"(£{avg_price_by_rating[highest_rating]:.2f}), while {lowest_rating}-star "
+          f"books have the lowest (£{avg_price_by_rating[lowest_rating]:.2f}).")
+
     plot_avg_price(avg_price_by_rating)
     print("\nChart saved to avg_price_by_rating.png")
+
+
+if __name__ == "__main__":
+    main()
