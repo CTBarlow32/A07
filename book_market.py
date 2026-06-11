@@ -36,7 +36,7 @@ class Book(Model):
 db.connect()
 db.create_tables([Book])
 
-#fethc url
+#fetch url
 def fetch_and_parse(url, retries=3, delay=2):
     """Fetch URL, return BeautifulSoup or None."""
     for attempt in range(retries):
